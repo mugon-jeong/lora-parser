@@ -13,15 +13,7 @@ data class GasAlarmStatus(
 ) : ByteParsable {
     companion object {
         fun fromBytes(bytes: List<Byte>): GasAlarmStatus {
-            val binaryString = ByteParsable.parseBitField(bytes)
-            return GasAlarmStatus(
-                o2Alarm = ByteParsable.getBitAsBoolean(binaryString, 7),
-                h2SAlarm = ByteParsable.getBitAsBoolean(binaryString, 6),
-                lelAlarm = ByteParsable.getBitAsBoolean(binaryString, 5),
-                coAlarm = ByteParsable.getBitAsBoolean(binaryString, 4),
-                power = ByteParsable.getBitAsBoolean(binaryString, 3),
-                activate = ByteParsable.getBitAsBoolean(binaryString, 2),
-            )
+            return ByteParsable.parseBytes<GasAlarmStatus>(bytes)
         }
     }
 }

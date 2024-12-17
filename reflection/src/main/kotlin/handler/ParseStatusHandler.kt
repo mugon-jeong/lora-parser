@@ -30,8 +30,8 @@ object ParseStatusHandler : AnnotationHandler {
         }
 
         return when (targetClass) {
-            GasAlarmStatus::class -> ByteParsable.parseBytes<GasAlarmStatus>(rawBytes)
-            SensorStatus::class -> ByteParsable.parseBytes<SensorStatus>(rawBytes)
+            GasAlarmStatus::class -> GasAlarmStatus.fromBytes(rawBytes)
+            SensorStatus::class -> SensorStatus.fromBytes(rawBytes)
             else -> throw IllegalArgumentException("Unsupported ByteParsable implementation: ${targetClass.simpleName}")
         }
     }
