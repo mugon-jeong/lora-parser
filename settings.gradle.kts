@@ -13,3 +13,4 @@ pluginManagement {
 rootProject.name = "lora-parser"
 include(":processor")
 include(":sensor")
+include(":reflection")

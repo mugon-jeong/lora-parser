@@ -10,5 +10,10 @@ fun main() {
         devEUI = base64ToByteArray("fdc388ffff2a0ea1"),
         byteArray = base64ToByteArray("AgAKAyAJFMduFkwl0KpTAA==")
     )
+    val parseSensorData = parseSensorData<SensorData>(
+        devEUI = base64ToByteArray("fdc388ffff2a0ea1"),
+        byteArray = base64ToByteArray("AgAKAyAJFMduFkwl0KpTAA==")
+    )
     println(sensorData)
+    println(parseSensorData)
 }
