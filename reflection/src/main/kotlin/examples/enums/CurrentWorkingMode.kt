@@ -1,6 +1,8 @@
-package enums
+package examples.enums
 
-enum class CurrentWorkingMode(override val bit: Int, override val description: String):BitEnum {
+import enums.BitEnum
+
+enum class CurrentWorkingMode(override val bit: Int, override val description: String): BitEnum {
     STANDBY(0, "standby mode"),
     TIMING(1, "timing mode"),
     PERIODIC(2, "periodic mode"),
@@ -9,7 +11,7 @@ enum class CurrentWorkingMode(override val bit: Int, override val description: S
     IN_MOVEMENT_FOR_MOTION(5, "in movement for motion mode"),
     END_OF_MOVEMENT_IN_MOTION(6, "end of movement in motion mode"),
 
-    UNKNOWN(100, "Unknown"),
+    UNKNOWN(-1, "Unknown"),
     ;
 
     companion object {

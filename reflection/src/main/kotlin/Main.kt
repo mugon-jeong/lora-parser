@@ -1,12 +1,12 @@
+import examples.sensor.SafeGas
+import examples.sensor.SafetySignal
+import examples.sensor.Weather
+
 fun main() {
-    val parseSafetySignal = parseSensorData<SafetySignal>(
-        devEUI = "fdc388ffff2a0ea1",
-        log = "AgAKAyAJFMduFkwl0KpTAA==",
-    )
-    println(parseSafetySignal)
-    val weather = parseSensorData<Weather>(
-        devEUI = "G4b9rj0BHCE=",
-        log = "AtMXAAwCUgHzAOQAPgmsIokWMgEnAAknEA==",
-    )
+    val safetySignal = SafetySignal.fromLora("fdc388ffff2a0ea1", "AgAKAyAJFMduFkwl0KpTAA==")
+    println(safetySignal)
+    val weather = Weather.fromLora("G4b9rj0BHCE=", "AtMXAAwCUgHzAOQAPgmsIokWMgEnAAknEA==")
     println(weather)
+    val safeGas = SafeGas.fromLora("G4b9rj0BHCE=","BAMiAEEAAwAAAAAAZAAAAAAAAAAUAAAAMgAAAAAAAAAAAAEJ0nfo")
+    println(safeGas)
 }

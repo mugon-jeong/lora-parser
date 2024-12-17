@@ -1,4 +1,6 @@
-package enums
+package examples.enums
+
+import enums.BitEnum
 
 enum class PositioningSuccessType(override val bit: Int, override val description: String) : BitEnum {
     WIFI(0, "WIFI positioning success (Customized Format)"),
@@ -8,7 +10,7 @@ enum class PositioningSuccessType(override val bit: Int, override val descriptio
     WIFI_LORA(4, "WIFI positioning success (LoRa Cloud DAS Format)"),
     GPS_LORA_DAS(5, "GPS positioning success (LoRa Cloud DAS Format)"),
 
-    UNKNOWN(100, "Unknown"),
+    UNKNOWN(-1, "Unknown"),
     ;
 
     companion object {

@@ -1,4 +1,6 @@
-package enums
+package examples.enums
+
+import enums.BitEnum
 
 enum class CurrentAuxiliaryOperation(
     override val bit: Int,
@@ -10,7 +12,7 @@ enum class CurrentAuxiliaryOperation(
     MAN_DOWN_STATUS(2, "Man Down status"),
     ALERT_ALARM(3, "Alert alarm"),
     SOS_ALARM(4, "SOS alarm"),
-    UNKNOWN(100, "Unknown");
+    UNKNOWN(-1, "Unknown");
 
     companion object {
         fun fromBit(bit: Int): CurrentAuxiliaryOperation {
