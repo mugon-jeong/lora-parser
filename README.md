@@ -151,6 +151,27 @@ enum class HexConverterType {
 3. **핸들러에 반영**
    `handleParseHex` 함수에 추가 변환기 로직을 적용합니다.
 
+```Kotlin
+fun handleParseHex(data: ByteArray, annotation: ParseHex, returnType: KClass<*>?): Any {
+    val rawBytes = data.slice(annotation.byteStart..annotation.byteEnd).toByteArray()
+    val scale = BigDecimal.valueOf(annotation.scale)
+
+    // converter 값에 따라 적절한 변환기 적용
+    return when (annotation.converter) {
+        HexConverterType.UNSIGNED -> ByteToUnsignedNumParser.convert(rawBytes, scale, BigDecimal.ZERO)
+           ...
+        HexConverterType.DEFAULT -> {
+            val hexValue = rawBytes.joinToString("") { it.toHexFormatted() }
+            when (returnType) {
+                Long::class -> HexUtils.hexToLong(hexValue)
+                   ...
+                else -> throw IllegalArgumentException("Unsupported type: $returnType")
+            }
+        }
+    }
+}
+```
+
 #### **2. 새로운 어노테이션 핸들러 추가**
 
 1. **핸들러 구현**
@@ -177,7 +198,16 @@ object CustomAnnotationHandler : AnnotationHandler {
 2. **Registry에 등록**
 
 ```kotlin
-AnnotationHandlerRegistry.register(CustomAnnotationHandler)
+object AnnotationHandlerRegistry {
+   val handlers = listOf(
+      DevEUIHandler,
+      ParseHexHandler,
+      ParseEnumHandler,
+      ParseStatusHandler,
+      FwVersionHandler,
+       ...
+   )
+}
 ```
 
 ### **유틸리티**
