@@ -1,6 +1,6 @@
 package enums
 
-enum class CurrentWorkingMode(val bit: Int, val description: String) {
+enum class CurrentWorkingMode(override val bit: Int, override val description: String):BitEnum {
     STANDBY(0, "standby mode"),
     TIMING(1, "timing mode"),
     PERIODIC(2, "periodic mode"),

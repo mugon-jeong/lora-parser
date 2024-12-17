@@ -4,7 +4,7 @@ import enums.PositioningSuccessType
 import enums.PositioningType
 
 @LoraParser
-data class SensorData(
+data class SafetySignal(
     @DevEUI
     override val devEUI: String,
     @ParseHex(byteStart = 0, byteEnd = 0)
@@ -25,6 +25,4 @@ data class SensorData(
     val latitude: Double,
     @ParseHex(byteStart = 10, byteEnd = 13, scale = 10_000_000.0)
     val longitude: Double,
-):BaseSensor {
-    companion object
-}
+) : BaseSensor

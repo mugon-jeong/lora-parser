@@ -1,6 +1,6 @@
 package enums
 
-enum class PositioningSuccessType(val bit: Int, val description: String) {
+enum class PositioningSuccessType(override val bit: Int, override val description: String) : BitEnum {
     WIFI(0, "WIFI positioning success (Customized Format)"),
     BLUETOOTH(1, "Bluetooth positioning success"),
     GPS_LORA(2, "GPS positioning success (LoRa Cloud Customized Format)"),

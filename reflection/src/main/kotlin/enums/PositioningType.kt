@@ -1,6 +1,6 @@
 package enums
 
-enum class PositioningType(val bit: Int, val description: String) {
+enum class PositioningType(override val bit: Int, override val description: String) : BitEnum {
     WORKING(0, "Working mode positioning"),
     MAN_DOWN(1, "Man Down positioning"),
     DOWN_LINK(2, "Downlink for positioning"),
