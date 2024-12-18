@@ -3,6 +3,8 @@ package io.parser.lora.handler
 import AnnotationHandler
 import io.parser.lora.annotation.FwVersion
 import io.parser.lora.utils.parseFwVersion
+import io.parser.lora.utils.parseFwVersionToShort
+import java.nio.ByteBuffer
 import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty
 import kotlin.reflect.full.findAnnotation
@@ -16,5 +18,17 @@ object FwVersionHandler : AnnotationHandler {
         val annotation = property.findAnnotation<FwVersion>() ?: param.findAnnotation<FwVersion>()!!
         val rawBytes = data.slice(annotation.byteStart..annotation.byteEnd)
         return parseFwVersion(rawBytes)
+    }
+
+    override fun handleDummy(property: KProperty<*>, param: KParameter, buffer: ByteBuffer, value: Any) {
+        val annotation = property.findAnnotation<FwVersion>()!!
+        val byteStart = annotation.byteStart
+        buffer.position(byteStart)
+
+        if (value is String) {
+            buffer.putShort(parseFwVersionToShort(value))
+        } else {
+            throw IllegalArgumentException("FwVersion can only be used with String type")
+        }
     }
 }

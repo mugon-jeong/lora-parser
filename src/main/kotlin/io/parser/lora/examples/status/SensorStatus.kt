@@ -1,7 +1,7 @@
 package io.parser.lora.examples.status
 
-import io.parser.lora.annotation.BitField
 import io.parser.lora.ByteParsable
+import io.parser.lora.annotation.BitField
 
 data class SensorStatus(
     @BitField(bitPosition = 0) val watchDog: Boolean,
@@ -13,9 +13,15 @@ data class SensorStatus(
     @BitField(bitPosition = 6) val battery: Boolean,
     @BitField(bitPosition = 7) val power: Boolean
 ) : ByteParsable {
+    fun toByte(): Byte {
+        return ByteParsable.toByte(this)
+    }
     companion object {
         fun fromBytes(bytes: List<Byte>): SensorStatus {
             return ByteParsable.parseBytes(bytes)
+        }
+        fun random(): SensorStatus {
+            return ByteParsable.generateRandomInstance()
         }
     }
 }

@@ -17,7 +17,7 @@ import io.parser.lora.enums.HexConverterType
  * val positioningType: PositioningType
  * ```
  */
-@Target(AnnotationTarget.VALUE_PARAMETER)
+@Target(AnnotationTarget.PROPERTY)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class ParseHex(
     val byteStart: Int, // 시작 바이트

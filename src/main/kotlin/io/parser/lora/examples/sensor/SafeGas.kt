@@ -1,5 +1,6 @@
 package io.parser.lora.examples.sensor
 
+import io.parser.lora.Dummy
 import io.parser.lora.annotation.ParseEnum
 import io.parser.lora.annotation.ParseHex
 import io.parser.lora.examples.enums.SafeGasAlarmType
@@ -9,7 +10,7 @@ import io.parser.lora.LoraParsable
 import io.parser.lora.annotation.DevEUI
 import io.parser.lora.annotation.LoraParser
 
-@LoraParser
+@LoraParser(size = 35)
 data class SafeGas(
     @DevEUI
     override val devEUI: String,
@@ -41,16 +42,16 @@ data class SafeGas(
     val adc: Int,
 ) : LoraParsable {
     companion object {
-        fun decimalPlaceResult(
-            decimalPlaces: Int,
-            value: Int,
-        ): Double {
-            return if (decimalPlaces != 0) value / Math.pow(10.0, decimalPlaces.toDouble()) else value.toDouble()
-        }
-
         fun fromLora(devEUI: String, log: String): SafeGas {
             return LoraParsable.parse<SafeGas>(devEUI, log)
         }
+
+        fun random(devEUI: String): SafeGas {
+            return LoraParsable.random(devEUI)
+        }
+    }
+    fun toDummy(): Dummy {
+        return LoraParsable.toDummy(this)
     }
 
 }

@@ -1,5 +1,6 @@
 package io.parser.lora.examples.sensor
 
+import io.parser.lora.Dummy
 import io.parser.lora.annotation.ParseEnum
 import io.parser.lora.annotation.ParseHex
 import io.parser.lora.enums.HexConverterType
@@ -12,7 +13,7 @@ import io.parser.lora.annotation.DevEUI
 import io.parser.lora.annotation.LoraParser
 import java.math.BigDecimal
 
-@LoraParser
+@LoraParser(size = 14)
 data class SafetySignal(
     @DevEUI
     override val devEUI: String,
@@ -39,5 +40,12 @@ data class SafetySignal(
         fun fromLora(devEUI: String, log: String): SafetySignal {
             return LoraParsable.parse<SafetySignal>(devEUI, log)
         }
+
+        fun random(devEUI: String): SafetySignal {
+            return LoraParsable.random(devEUI)
+        }
+    }
+    fun toDummy(): Dummy {
+        return LoraParsable.toDummy(this)
     }
 }

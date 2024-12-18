@@ -1,6 +1,9 @@
 package io.parser.lora
 
 import io.parser.lora.annotation.BitField
+import kotlin.random.Random
+import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.memberProperties
 
 /**
  * ByteParsable 인터페이스는 바이트 데이터를 비트 필드 기반으로 파싱하기 위한 기능을 제공합니다.
@@ -22,7 +25,7 @@ interface ByteParsable {
          */
         fun parseBitField(bytes: List<Byte>): String {
             require(bytes.size == 1) { "Parsing requires exactly 1 byte." }
-            return bytes[0].toInt().and(0xFF).toString(2).padStart(8, '0')
+            return bytes[0].toInt().and(0xFF).toString(2).padStart(8, '0').reversed()
         }
 
         /**
@@ -68,9 +71,88 @@ interface ByteParsable {
                 val bitField = property?.annotations?.filterIsInstance<BitField>()?.firstOrNull()
 
                 if (bitField != null) {
-                    getBitAsBoolean(binaryString, bitField.bitPosition)
+                    // Boolean 타입인지 검증
+                    if (param.type.classifier == Boolean::class) {
+                        getBitAsBoolean(binaryString, bitField.bitPosition)
+                    } else {
+                        throw IllegalArgumentException("Property ${param.name} annotated with @BitField must be of type Boolean")
+                    }
                 } else {
                     throw IllegalArgumentException("Property ${param.name} must be annotated with @io.parser.lora.annotation.BitField")
+                }
+            }
+
+            return constructor.callBy(args)
+        }
+
+        /**
+         * Reflection을 사용하여 클래스 [T]의 @BitField 어노테이션에 맞게
+         * Byte 값을 생성합니다.
+         *
+         * @param instance 변환할 객체. 객체의 프로퍼티 값을 기반으로 Byte를 생성하기 위해 필요합니다.
+         *                 Reflection으로 프로퍼티의 정의는 가져올 수 있지만, 특정 객체의 값을 읽으려면
+         *                 해당 객체(`instance`)를 기준으로 값을 읽어야 합니다.
+         *
+         * @return 변환된 Byte 값
+         * @throws IllegalArgumentException 어노테이션이 잘못되었거나 필드 값이 Boolean이 아닌 경우
+         *
+         * 예시:
+         * ```
+         * val sensorStatus = SensorStatus(
+         *     watchDog = true,
+         *     wakeUp = false,
+         *     readyToSleep = true,
+         *     triggerSensorEvent = false,
+         *     downlinkAck = true,
+         *     triggerBatteryStatus = false,
+         *     battery = true,
+         *     power = false
+         * )
+         *
+         * val byteValue = ByteParsable.toByte(sensorStatus)
+         * println(byteValue) // 0b10101001
+         * ```
+         */
+        inline fun <reified T : Any> toByte(instance: T): Byte {
+            var byte = 0
+
+            // @BitField가 적용된 프로퍼티들을 가져옴
+            T::class.memberProperties.forEach { property ->
+                val bitField = property.findAnnotation<BitField>()
+                if (bitField != null) {
+                    // Boolean 값인지 확인
+                    val value = property.get(instance)
+                    require(value is Boolean) {
+                        "Property ${property.name} must be of type Boolean to use @BitField"
+                    }
+
+                    // bitPosition에 따라 비트 설정
+                    if (value) {
+                        byte = byte or (1 shl bitField.bitPosition)
+                    }
+                }
+            }
+            return byte.toByte()
+        }
+
+        inline fun <reified T : Any> generateRandomInstance(): T {
+            val clazz = T::class
+            val constructor = clazz.constructors.first()
+
+            // 생성자 파라미터와 매칭하여 값 설정
+            val args = constructor.parameters.associateWith { param ->
+                val property = clazz.members.find { it.name == param.name }
+                val bitField = property?.annotations?.filterIsInstance<BitField>()?.firstOrNull()
+
+                if (bitField != null) {
+                    // Boolean 타입인지 검증
+                    if (param.type.classifier == Boolean::class) {
+                        Random.nextBoolean()
+                    } else {
+                        throw IllegalArgumentException("Property ${param.name} annotated with @BitField must be of type Boolean")
+                    }
+                } else {
+                    throw IllegalArgumentException("Property ${param.name} must be annotated with @BitField")
                 }
             }
 

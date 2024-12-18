@@ -1,6 +1,6 @@
 package io.parser.lora.annotation
 
-@Target(AnnotationTarget.VALUE_PARAMETER)
+@Target(AnnotationTarget.PROPERTY)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class ParseEnum(
     val byteStart: Int, // 시작 바이트

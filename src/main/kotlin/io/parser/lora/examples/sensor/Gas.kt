@@ -1,5 +1,6 @@
 package io.parser.lora.examples.sensor
 
+import io.parser.lora.Dummy
 import io.parser.lora.annotation.ParseEnum
 import io.parser.lora.annotation.ParseHex
 import io.parser.lora.annotation.ParseStatus
@@ -11,7 +12,7 @@ import io.parser.lora.annotation.DevEUI
 import io.parser.lora.annotation.LoraParser
 import java.math.BigDecimal
 
-@LoraParser
+@LoraParser(size = 18)
 data class Gas(
     @DevEUI
     override val devEUI: String,
@@ -32,5 +33,11 @@ data class Gas(
         fun fromLora(devEUI: String, log: String): Gas {
             return LoraParsable.parse<Gas>(devEUI, log)
         }
+        fun random(devEUI: String): Gas {
+            return LoraParsable.random(devEUI)
+        }
+    }
+    fun toDummy(): Dummy {
+        return LoraParsable.toDummy(this)
     }
 }

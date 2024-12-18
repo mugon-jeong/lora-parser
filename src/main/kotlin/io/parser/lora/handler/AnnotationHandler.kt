@@ -1,3 +1,4 @@
+import java.nio.ByteBuffer
 import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty
 
@@ -69,4 +70,11 @@ interface AnnotationHandler {
         data: ByteArray,
         devEuiBytes: ByteArray
     ): Any?
+
+    fun handleDummy(
+        property: KProperty<*>,
+        param: KParameter,
+        buffer: ByteBuffer,
+        value: Any
+    ) {}
 }

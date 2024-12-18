@@ -1,5 +1,6 @@
 package io.parser.lora.examples.sensor
 
+import io.parser.lora.Dummy
 import io.parser.lora.annotation.ParseHex
 import io.parser.lora.annotation.ParseStatus
 import io.parser.lora.enums.HexConverterType
@@ -8,11 +9,11 @@ import io.parser.lora.LoraParsable
 import io.parser.lora.annotation.DevEUI
 import io.parser.lora.annotation.FwVersion
 import io.parser.lora.annotation.LoraParser
+import io.parser.lora.utils.parseFwVersionToShort
 import java.math.BigDecimal
 import java.nio.ByteBuffer
-import kotlin.random.Random
 
-@LoraParser
+@LoraParser(size = 25)
 data class Weather(
     @DevEUI
     override val devEUI: String, // 장치 고유 식별자
@@ -65,29 +66,19 @@ data class Weather(
         }
 
         /**
-         * 더미 데이터를 생성하는 메서드
+         * 리플렉션을 사용해 랜덤 값을 생성하는 함수
          * @param devEUI 장치 고유 식별자
-         * @return 생성된 바이트 배열
+         * @return 랜덤 Weather 객체
          */
-        fun generate(devEUI: String): ByteArray {
-            val buffer = ByteBuffer.allocate(25) // 전체 바이트 크기: 25바이트
-
-            buffer.put(0, Random.nextLong(0, 256).toByte()) // payloadType (1바이트)
-            buffer.put(1, Random.nextInt(0, 256).toByte()) // status (1바이트)
-            buffer.put(2, Random.nextLong(0, 256).toByte()) // ackId (1바이트)
-            buffer.putShort(3, Random.nextInt(0, 65536).toShort()) // serviceType (2바이트)
-            buffer.putShort(5, (Random.nextDouble(0.0, 100.0) * 10).toInt().toShort()) // temperature (2바이트)
-            buffer.putShort(7, (Random.nextDouble(0.0, 100.0) * 10).toInt().toShort()) // humidity (2바이트)
-            buffer.putShort(9, (Random.nextDouble(0.0, 50.0) * 10).toInt().toShort()) // windSpeed (2바이트)
-            buffer.putShort(11, Random.nextInt(0, 360).toShort()) // windDirection (2바이트)
-            buffer.putShort(13, (Random.nextDouble(0.0, 100.0) * 10).toInt().toShort()) // magneticNorth (2바이트)
-            buffer.putShort(15, (Random.nextDouble(900.0, 1100.0) * 10).toInt().toShort()) // pressure (2바이트)
-            buffer.putShort(17, (Random.nextDouble(0.0, 500.0) * 100).toInt().toShort()) // rainfall (2바이트)
-            buffer.putShort(19, (Random.nextDouble(0.0, 50.0) * 10).toInt().toShort()) // voltage (2바이트)
-            buffer.putShort(21, Random.nextInt(0, 65536).toShort()) // fwServiceType (2바이트)
-            buffer.putShort(23, Random.nextInt(0, 65536).toShort()) // fwVersion (2바이트)
-
-            return buffer.array()
+        fun random(devEUI: String): Weather {
+            return LoraParsable.random(devEUI)
         }
+    }
+
+    /**
+     * Weather 객체를 Dummy 객체로 변환하는 함수
+     */
+    fun toDummy(): Dummy {
+        return LoraParsable.toDummy(this)
     }
 }

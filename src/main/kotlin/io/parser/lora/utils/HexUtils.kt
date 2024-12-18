@@ -68,9 +68,8 @@ fun List<Byte>.toHexString(): String = joinToString("") { "%02x".format(it) }
  * 16진수 문자열을 ByteArray로 변환합니다.
  *
  * @return 변환된 ByteArray
- * @throws IllegalArgumentException 16진수 문자열의 길이가 짝수가 아닌 경우 예외를 발생시킵니다.
  */
-fun String.hexStringToByteArray(): ByteArray {
-    require(length % 2 == 0) { "Hex string must have an even length" }
-    return chunked(2).map { it.toInt(16).toByte() }.toByteArray()
-}
+fun String.hexToByteArray(): ByteArray =
+    chunked(2).map { it.toInt(16).toByte() }.toByteArray()
+
+fun ByteArray.toBase64(): String = Base64.getEncoder().encodeToString(this)

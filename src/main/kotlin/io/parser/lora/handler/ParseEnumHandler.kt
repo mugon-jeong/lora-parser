@@ -4,7 +4,10 @@ import AnnotationHandler
 import io.parser.lora.annotation.ParseEnum
 import io.parser.lora.enums.BitEnum
 import io.parser.lora.utils.toHexFormatted
+import java.nio.ByteBuffer
 import kotlin.reflect.KClass
+import kotlin.reflect.KParameter
+import kotlin.reflect.KProperty
 import kotlin.reflect.full.findAnnotation
 
 object ParseEnumHandler : AnnotationHandler {
@@ -37,5 +40,29 @@ object ParseEnumHandler : AnnotationHandler {
 
         val enumConstants = targetClass.java.enumConstants as Array<BitEnum>
         return enumConstants.find { it.bit == bitValue } ?: throw IllegalArgumentException("Invalid bit value: $bitValue")
+    }
+
+    override fun handleDummy(property: KProperty<*>, param: KParameter, buffer: ByteBuffer, value: Any) {
+        val annotation = property.findAnnotation<ParseEnum>() ?: param.findAnnotation<ParseEnum>()!!
+        val targetClass = param.type.classifier as? KClass<*>
+            ?: throw IllegalArgumentException("Unsupported property '${property.name}'")
+
+        require(BitEnum::class.java.isAssignableFrom(targetClass.java)) {
+            "Enum Class ${targetClass.simpleName} must implement BitEnum"
+        }
+
+        val enumValue = value as? BitEnum
+            ?: throw IllegalArgumentException("Value must implement BitEnum for property '${property.name}'")
+
+        val bitValue = enumValue.bit
+        val byteStart = annotation.byteStart
+        val byteEnd = annotation.byteEnd
+
+        buffer.position(byteStart)
+        if (byteEnd - byteStart == 0) {
+            buffer.put(bitValue.toByte())
+        } else {
+            buffer.putShort(bitValue.toShort())
+        }
     }
 }
