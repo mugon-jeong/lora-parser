@@ -1,7 +1,7 @@
 package io.parser.lora
 
 import AnnotationHandler
-import io.parser.lora.handler.AnnotationHandlerRegistry
+import io.parser.lora.registry.AnnotationHandlerRegistry
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.reflections.Reflections

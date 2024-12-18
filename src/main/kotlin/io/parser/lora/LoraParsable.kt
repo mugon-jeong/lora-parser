@@ -4,8 +4,7 @@ import io.parser.lora.annotation.DevEUI
 import io.parser.lora.annotation.FwVersion
 import io.parser.lora.annotation.LoraParser
 import io.parser.lora.annotation.ParseHex
-import io.parser.lora.examples.status.SensorStatus
-import io.parser.lora.handler.AnnotationHandlerRegistry
+import io.parser.lora.registry.AnnotationHandlerRegistry
 import io.parser.lora.utils.HexUtils.base64ToByteArray
 import io.parser.lora.utils.hexToByteArray
 import io.parser.lora.utils.toBase64
@@ -70,33 +69,42 @@ interface LoraParsable {
          * @param devEUI 장치 고유 식별자 (선택적)
          * @return 랜덤 [T] 객체
          */
-        inline fun <reified T : Any> random(devEUI: String? = null): T {
+        inline fun <reified T : Any> random(devEUI: String? = null, customRandomProvider: (KClass<*>) -> Any? = { null }): T {
             val clazz = T::class
             require(clazz.isData) { "Only data classes are supported." }
-            val constructor = clazz.primaryConstructor ?: throw IllegalArgumentException("Class must have a primary constructor")
+            val constructor = clazz.primaryConstructor
+                ?: throw IllegalArgumentException("Class must have a primary constructor")
 
             val args = constructor.parameters.associateWith { param ->
                 val property = clazz.memberProperties.find { it.name == param.name }
                     ?: throw IllegalArgumentException("Property ${param.name} not found in class ${clazz.simpleName}")
                 property.isAccessible = true
 
+                val customValue = customRandomProvider(param.type.classifier as KClass<*>)
+                if (customValue != null) {
+                    return@associateWith customValue
+                }
+
                 when (param.type.classifier as KClass<*>) {
                     Long::class -> Random.nextLong(0, 256)
                     Int::class -> Random.nextInt(0, 65536)
                     BigDecimal::class -> {
                         val scale = property.findAnnotation<ParseHex>()?.scale ?: 1.0
+                        val decimalPlaces = (Math.log10(scale)).toInt().coerceAtLeast(0) // scale에 따라 소수점 자리수 계산
                         BigDecimal(Random.nextDouble(0.0, 100.0))
-                            .setScale((Math.log10(scale).toInt() + 1).coerceAtLeast(1), RoundingMode.HALF_UP)
+                            .setScale(decimalPlaces, RoundingMode.HALF_UP) // 계산된 소수점 자리수를 반영
                     }
 
                     String::class -> when {
                         property.hasAnnotation<DevEUI>() || param.hasAnnotation<DevEUI>() -> devEUI
                             ?: throw IllegalArgumentException("DevEUI is required for property ${property.name}")
+
                         property.hasAnnotation<FwVersion>() || param.hasAnnotation<FwVersion>() -> "V${Random.nextInt(1, 10)}.${Random.nextInt(0, 10)}.${Random.nextInt(0, 100)}"
+
                         else -> "RandomString${Random.nextInt(1000)}"
                     }
+
                     Boolean::class -> Random.nextBoolean()
-                    SensorStatus::class -> SensorStatus.random()
                     else -> throw IllegalArgumentException("Unsupported property type for ${property.name}")
                 }
             }
@@ -129,14 +137,15 @@ interface LoraParsable {
                 val handler = AnnotationHandlerRegistry.handlers.find { it.canHandle(property, param) }
                     ?: throw IllegalArgumentException("Unsupported property '${property.name}' in class ${clazz.simpleName}")
                 handler.handleDummy(property, param, buffer, value)
-                println("Property: ${property.name}, Value: $value, Buffer Position: ${buffer.position()}")
+//                println("Property: ${property.name}, Value: $value, Buffer Position: ${buffer.position()}")
             }
-            println("Final Buffer Position: ${buffer.position()}, Expected Size: $size")
+//            println("Final Buffer Position: ${buffer.position()}, Expected Size: $size")
+
 
             // Dummy 객체 생성 및 반환
             return Dummy(
                 devEUI = devEUI.hexToByteArray().toBase64(),
-                lora = Base64.getEncoder().encodeToString(loraPayload)
+                lora = Base64.getEncoder().encodeToString(loraPayload),
             )
         }
     }

@@ -12,6 +12,7 @@ import kotlin.reflect.full.memberProperties
  * 각 비트 위치를 Boolean 값으로 매핑하는 메서드를 포함합니다.
  */
 interface ByteParsable {
+    fun toByte(): Byte
     companion object {
         /**
          * 바이트 리스트를 비트 필드 문자열로 변환합니다.

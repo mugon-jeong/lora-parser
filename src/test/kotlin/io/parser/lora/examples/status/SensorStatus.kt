@@ -2,7 +2,9 @@ package io.parser.lora.examples.status
 
 import io.parser.lora.ByteParsable
 import io.parser.lora.annotation.BitField
+import io.parser.lora.annotation.LoraStatus
 
+@LoraStatus
 data class SensorStatus(
     @BitField(bitPosition = 0) val watchDog: Boolean,
     @BitField(bitPosition = 1) val wakeUp: Boolean,
@@ -13,7 +15,7 @@ data class SensorStatus(
     @BitField(bitPosition = 6) val battery: Boolean,
     @BitField(bitPosition = 7) val power: Boolean
 ) : ByteParsable {
-    fun toByte(): Byte {
+    override fun toByte(): Byte {
         return ByteParsable.toByte(this)
     }
     companion object {

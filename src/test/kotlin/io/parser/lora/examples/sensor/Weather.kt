@@ -71,7 +71,12 @@ data class Weather(
          * @return 랜덤 Weather 객체
          */
         fun random(devEUI: String): Weather {
-            return LoraParsable.random(devEUI)
+            return LoraParsable.random(devEUI) { klass ->
+                when (klass) {
+                    SensorStatus::class -> SensorStatus.random() // SensorStatus에 대해 커스텀 랜덤 생성기 사용
+                    else -> null // 기본 생성 로직 사용
+                }
+            }
         }
     }
 
