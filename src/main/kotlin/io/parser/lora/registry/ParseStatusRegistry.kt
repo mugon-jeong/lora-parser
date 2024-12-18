@@ -4,7 +4,7 @@ import io.parser.lora.ByteParsable
 import kotlin.reflect.KClass
 
 object ParseStatusRegistry {
-    private val registeredHandlers = mutableMapOf<KClass<*>, (List<Byte>) -> ByteParsable>()
+    val registeredHandlers = mutableMapOf<KClass<*>, (List<Byte>) -> ByteParsable>()
 
     /**
      * 핸들러를 수동으로 등록

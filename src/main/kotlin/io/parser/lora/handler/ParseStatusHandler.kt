@@ -3,14 +3,15 @@ package io.parser.lora.handler
 import AnnotationHandler
 import io.parser.lora.ByteParsable
 import io.parser.lora.annotation.ParseStatus
-import io.parser.lora.registry.ParseStatusRegistry
 import java.nio.ByteBuffer
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty
 import kotlin.reflect.full.findAnnotation
 
-object ParseStatusHandler : AnnotationHandler {
+class ParseStatusHandler(handlers: Map<KClass<*>, (List<Byte>) -> ByteParsable>) : AnnotationHandler {
+
+    private val supportedClasses: Map<KClass<*>, (List<Byte>) -> ByteParsable> = handlers
 
     override fun canHandle(property: KProperty<*>, param: KParameter): Boolean {
         return property.findAnnotation<ParseStatus>() != null || param.findAnnotation<ParseStatus>() != null
@@ -28,7 +29,7 @@ object ParseStatusHandler : AnnotationHandler {
             ?: throw IllegalArgumentException("Unsupported type")
 
         // ParseStatusRegistry에서 핸들러를 가져옴
-        val handler = ParseStatusRegistry.getHandler(targetClass)
+        val handler = supportedClasses[targetClass]
             ?: throw IllegalArgumentException("No handler registered for ${targetClass.simpleName}")
 
         return handler(rawBytes)
