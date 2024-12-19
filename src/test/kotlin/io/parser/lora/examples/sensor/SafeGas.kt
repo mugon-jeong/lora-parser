@@ -10,7 +10,7 @@ import io.parser.lora.LoraParsable
 import io.parser.lora.annotation.DevEUI
 import io.parser.lora.annotation.LoraParser
 
-@LoraParser(size = 35)
+@LoraParser(size = 37)
 data class SafeGas(
     @DevEUI
     override val devEUI: String,
@@ -38,7 +38,7 @@ data class SafeGas(
     val twaAlarmValue: Int,
     @ParseEnum(byteStart = 33, byteEnd = 34)
     val alarmType: SafeGasAlarmType,
-    @ParseHex(byteStart = 32, byteEnd = 33)
+    @ParseHex(byteStart = 35, byteEnd = 36)
     val adc: Int,
 ) : LoraParsable {
     companion object {

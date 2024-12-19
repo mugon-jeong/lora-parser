@@ -48,7 +48,7 @@ fun handleRandomParseHex(annotation: ParseHex, returnType: KClass<*>?): Any {
         HexConverterType.DEFAULT -> {
             when (returnType) {
                 Long::class -> Random.nextLong(0, 256)
-                Int::class -> Random.nextInt(0, 65536)
+                Int::class -> Random.nextInt(0, 256)
                 Float::class -> (1..100).random().toFloat() / scale.toFloat()
                 Double::class -> (1..100).random().toDouble() / scale.toDouble()
                 BigDecimal::class -> BigDecimal.valueOf((1..100).random().toDouble())
