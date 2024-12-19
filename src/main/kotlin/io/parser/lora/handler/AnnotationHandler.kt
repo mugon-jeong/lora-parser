@@ -1,4 +1,5 @@
 import java.nio.ByteBuffer
+import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty
 
@@ -69,6 +70,13 @@ interface AnnotationHandler {
         param: KParameter,
         data: ByteArray,
         devEuiBytes: ByteArray
+    ): Any?
+
+    fun random(
+        property: KProperty<*>,
+        param: KParameter,
+        devEui: String,
+        customRandomProvider: (KClass<*>) -> Any? = { null }
     ): Any?
 
     fun handleDummy(

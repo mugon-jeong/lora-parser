@@ -1,6 +1,7 @@
 package io.parser.lora.examples.enums
 
 import io.parser.lora.enums.BitEnum
+import io.parser.lora.examples.enums.CurrentAuxiliaryOperation.UNKNOWN
 
 enum class CurrentWorkingMode(override val bit: Int, override val description: String): BitEnum {
     STANDBY(0, "standby mode"),
@@ -13,7 +14,9 @@ enum class CurrentWorkingMode(override val bit: Int, override val description: S
 
     UNKNOWN(-1, "Unknown"),
     ;
-
+    override fun unknown(): BitEnum {
+        return UNKNOWN
+    }
     companion object {
         fun fromBit(bit: Int): CurrentWorkingMode {
             return entries.find { it.bit == bit } ?: UNKNOWN

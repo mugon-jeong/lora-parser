@@ -14,6 +14,9 @@ enum class CurrentAuxiliaryOperation(
     SOS_ALARM(4, "SOS alarm"),
     UNKNOWN(-1, "Unknown");
 
+    override fun unknown(): BitEnum {
+        return UNKNOWN
+    }
     companion object {
         fun fromBit(bit: Int): CurrentAuxiliaryOperation {
             return entries.find { it.bit == bit } ?: UNKNOWN

@@ -69,7 +69,7 @@ interface LoraParsable {
          * @param devEUI 장치 고유 식별자 (선택적)
          * @return 랜덤 [T] 객체
          */
-        inline fun <reified T : Any> random(devEUI: String? = null, customRandomProvider: (KClass<*>) -> Any? = { null }): T {
+        inline fun <reified T : Any> random(devEUI: String, crossinline customRandomProvider: (KClass<*>) -> Any? = { null }): T {
             val clazz = T::class
             require(clazz.isData) { "Only data classes are supported." }
             val constructor = clazz.primaryConstructor
@@ -80,32 +80,11 @@ interface LoraParsable {
                     ?: throw IllegalArgumentException("Property ${param.name} not found in class ${clazz.simpleName}")
                 property.isAccessible = true
 
-                val customValue = customRandomProvider(param.type.classifier as KClass<*>)
-                if (customValue != null) {
-                    return@associateWith customValue
-                }
-
-                when (param.type.classifier as KClass<*>) {
-                    Long::class -> Random.nextLong(0, 256)
-                    Int::class -> Random.nextInt(0, 65536)
-                    BigDecimal::class -> {
-                        val scale = property.findAnnotation<ParseHex>()?.scale ?: 1.0
-                        val decimalPlaces = (Math.log10(scale)).toInt().coerceAtLeast(0) // scale에 따라 소수점 자리수 계산
-                        BigDecimal(Random.nextDouble(0.0, 100.0))
-                            .setScale(decimalPlaces, RoundingMode.HALF_UP) // 계산된 소수점 자리수를 반영
-                    }
-
-                    String::class -> when {
-                        property.hasAnnotation<DevEUI>() || param.hasAnnotation<DevEUI>() -> devEUI
-                            ?: throw IllegalArgumentException("DevEUI is required for property ${property.name}")
-
-                        property.hasAnnotation<FwVersion>() || param.hasAnnotation<FwVersion>() -> "V${Random.nextInt(1, 10)}.${Random.nextInt(0, 10)}.${Random.nextInt(0, 100)}"
-
-                        else -> "RandomString${Random.nextInt(1000)}"
-                    }
-
-                    Boolean::class -> Random.nextBoolean()
-                    else -> throw IllegalArgumentException("Unsupported property type for ${property.name}")
+                // 핸들러를 순회하며 처리
+                val handler = AnnotationHandlerRegistry.handlers.find { it.canHandle(property, param) }
+                    ?: throw IllegalArgumentException("Unsupported property '${property.name}' in class ${clazz.simpleName}")
+                handler.random(property, param, devEUI) {
+                    customRandomProvider(it)
                 }
             }
 

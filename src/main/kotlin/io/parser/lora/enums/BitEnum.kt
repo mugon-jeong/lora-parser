@@ -9,4 +9,6 @@ package io.parser.lora.enums
 interface BitEnum {
     val bit: Int
     val description: String
+
+    fun unknown(): BitEnum
 }

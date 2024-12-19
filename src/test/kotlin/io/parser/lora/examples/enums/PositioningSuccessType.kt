@@ -13,6 +13,9 @@ enum class PositioningSuccessType(override val bit: Int, override val descriptio
     UNKNOWN(-1, "Unknown"),
     ;
 
+    override fun unknown(): BitEnum {
+        return UNKNOWN
+    }
     companion object {
         fun fromBit(bit: Int): PositioningSuccessType {
             return entries.find { it.bit == bit } ?: UNKNOWN

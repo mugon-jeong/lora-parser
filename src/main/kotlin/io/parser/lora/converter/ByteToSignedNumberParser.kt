@@ -7,7 +7,7 @@ import kotlin.math.pow
  * 바이트 배열을 부호 있는 숫자로 변환한 후,
  * 스케일 및 오프셋을 적용하는 컨버터.
  */
-object ByteToSignedNumberParser {
+object ByteToSignedNumberParser : LoraConverter {
 
     /**
      * 바이트 배열을 부호 있는 숫자로 파싱하고, 스케일 및 오프셋을 적용합니다.
@@ -17,7 +17,7 @@ object ByteToSignedNumberParser {
      * @param offset 더할 오프셋 값 [BigDecimal].
      * @return 스케일 및 오프셋이 적용된 [BigDecimal] 값.
      */
-    fun convert(bytes: ByteArray, scale: BigDecimal, offset: BigDecimal): BigDecimal {
+    override fun convert(bytes: ByteArray, bitIndex: Int?, bitSize: Int?, scale: Int?, offset: BigDecimal?): Any {
         val hex = bytes.joinToString("") { "%02x".format(it) } // 바이트 배열을 16진수 문자열로 변환
         val byteLen = hex.length / 2 // 바이트 길이
         val bitLen = byteLen * 8 - 1 // 부호 비트 제외한 비트 길이
@@ -30,6 +30,11 @@ object ByteToSignedNumberParser {
         }
 
         val parsedValue = BigDecimal.valueOf(decimalValue) // Long 값을 BigDecimal로 변환
-        return (parsedValue.multiply(scale)).add(offset) // 스케일과 오프셋 적용
+        return (parsedValue.setScale(scale ?: 0)).add(offset) // 스케일과 오프셋 적용
+    }
+
+    override fun random(scale: Int?): Any {
+        val randomValue = (Int.MIN_VALUE..Int.MAX_VALUE).random()
+        return BigDecimal(randomValue).setScale(scale ?: 0)
     }
 }

@@ -1,6 +1,8 @@
 package io.parser.lora.converter
 
-object BitToUnsignedNumParser {
+import java.math.BigDecimal
+
+object BitToUnsignedNumParser : LoraConverter {
 
     /**
      * 바이트 배열의 특정 비트 영역을 무부호 숫자로 변환합니다.
@@ -10,10 +12,15 @@ object BitToUnsignedNumParser {
      * @param bitSize 추출할 비트 길이.
      * @return 비트 영역의 무부호 정수 값.
      */
-    fun convert(bytes: ByteArray, bitIndex: Int, bitSize: Int): Int {
+    override fun convert(bytes: ByteArray, bitIndex: Int?, bitSize: Int?, scale: Int?, offset: BigDecimal?): Any {
+        require(bitIndex != null && bitSize != null) { "Bit index and size must be provided" }
         val bits = byteToBitString(bytes) // 바이트 배열 → 비트 문자열
         val bitSubString = bits.substring(bitIndex, bitIndex + bitSize) // 비트 영역 추출
         return bitSubString.toInt(2) // 2진수 문자열 → 정수 변환
+    }
+
+    override fun random(scale: Int?): Any {
+        return (0..255).random()
     }
 
     /**

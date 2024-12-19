@@ -35,6 +35,15 @@ class ParseStatusHandler(handlers: Map<KClass<*>, (List<Byte>) -> ByteParsable>)
         return handler(rawBytes)
     }
 
+    override fun random(
+        property: KProperty<*>,
+        param: KParameter,
+        devEui: String,
+        customRandomProvider: (KClass<*>) -> Any?
+    ): Any? {
+        return customRandomProvider(param.type.classifier as KClass<*>)
+    }
+
     override fun handleDummy(property: KProperty<*>, param: KParameter, buffer: ByteBuffer, value: Any) {
         val annotation = property.findAnnotation<ParseStatus>()!!
         val byteStart = annotation.byteStart

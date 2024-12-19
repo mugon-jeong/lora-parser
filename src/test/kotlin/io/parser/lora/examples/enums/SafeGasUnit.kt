@@ -27,6 +27,9 @@ enum class SafeGasUnit(override val bit: Int, override val description: String) 
     UNKNOWN(-1, "Unknown"),
     ;
 
+    override fun unknown(): BitEnum {
+        return UNKNOWN
+    }
     companion object {
         fun fromCode(bit: Int): SafeGasUnit {
             return entries.find { it.bit == bit } ?: UNKNOWN

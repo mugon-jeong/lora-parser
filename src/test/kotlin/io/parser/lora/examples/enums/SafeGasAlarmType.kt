@@ -14,6 +14,9 @@ enum class SafeGasAlarmType(override val bit: Int, override val description: Str
     ABNORMAL(8, "Abnormal Alarm"),
     ;
 
+    override fun unknown(): BitEnum {
+        return UNKNOWN
+    }
     companion object {
         fun fromCode(bit: Int): SafeGasAlarmType {
             return entries.find { it.bit == bit } ?: UNKNOWN

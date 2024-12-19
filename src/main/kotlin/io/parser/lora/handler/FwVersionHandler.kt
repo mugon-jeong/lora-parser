@@ -5,6 +5,8 @@ import io.parser.lora.annotation.FwVersion
 import io.parser.lora.utils.parseFwVersion
 import io.parser.lora.utils.parseFwVersionToShort
 import java.nio.ByteBuffer
+import kotlin.random.Random
+import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty
 import kotlin.reflect.full.findAnnotation
@@ -18,6 +20,15 @@ object FwVersionHandler : AnnotationHandler {
         val annotation = property.findAnnotation<FwVersion>() ?: param.findAnnotation<FwVersion>()!!
         val rawBytes = data.slice(annotation.byteStart..annotation.byteEnd)
         return parseFwVersion(rawBytes)
+    }
+
+    override fun random(
+        property: KProperty<*>,
+        param: KParameter,
+        devEui: String,
+        customRandomProvider: (KClass<*>) -> Any?
+    ): Any {
+        return "V${Random.nextInt(1, 10)}.${Random.nextInt(0, 10)}.${Random.nextInt(0, 100)}"
     }
 
     override fun handleDummy(property: KProperty<*>, param: KParameter, buffer: ByteBuffer, value: Any) {

@@ -12,6 +12,9 @@ enum class PositioningType(override val bit: Int, override val description: Stri
     UNKNOWN(-1, "Unknown"),
     ;
 
+    override fun unknown(): BitEnum {
+        return UNKNOWN
+    }
     companion object {
         fun fromBit(bit: Int): PositioningType {
             return entries.find { it.bit == bit } ?: UNKNOWN

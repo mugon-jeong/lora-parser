@@ -20,6 +20,9 @@ enum class GasMsgType(
     HEART_BEAT(11, "Heart beat"),
     UNKNOWN(-1, "Unknown");
 
+    override fun unknown(): BitEnum {
+        return UNKNOWN
+    }
     companion object {
         /**
          * 비트 값으로 `GasMsgType` 객체를 반환합니다.
