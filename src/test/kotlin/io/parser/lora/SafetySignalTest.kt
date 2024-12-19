@@ -1,6 +1,6 @@
-package io.parser.lora.examples
+package io.parser.lora
 
-import io.parser.lora.ByteParsable
+import io.parser.lora.examples.TestUtils
 import io.parser.lora.examples.sensor.SafetySignal
 import io.parser.lora.examples.status.GasAlarmStatus
 import io.parser.lora.examples.status.SensorStatus
