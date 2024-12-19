@@ -45,8 +45,34 @@ object ParseHexHandler : AnnotationHandler {
         buffer.position(byteStart)
 
         when (property.returnType.classifier as KClass<*>) {
-            Long::class -> buffer.put((value as Long).toByte())
-            Int::class -> buffer.putShort((value as Int).toShort())
+            Long::class -> {
+                val longValue = (value as Long)
+                val valueBytes = ByteBuffer.allocate(Long.SIZE_BYTES).putLong(longValue).array()
+                require(valueBytes.size >= byteLength) {
+                    "Long value exceeds the allocated byte range (${valueBytes.size} > $byteLength)"
+                }
+
+                // 버퍼에 값 저장 (초기 바이트를 0으로 채우고 뒤에서부터 값 삽입)
+                val paddedArray = ByteArray(byteLength) { 0 }
+                System.arraycopy(valueBytes, valueBytes.size - byteLength, paddedArray, 0, byteLength)
+
+                println("16진수로 변환된 Long 값: ${paddedArray.joinToString(" ") { String.format("%02X", it) }}") // 16진수 출력
+                buffer.put(paddedArray)
+            }
+            Int::class -> {
+                val intValue = (value as Int)
+                val valueBytes = ByteBuffer.allocate(Int.SIZE_BYTES).putInt(intValue).array()
+                require(valueBytes.size >= byteLength) {
+                    "Int value exceeds the allocated byte range (${valueBytes.size} > $byteLength)"
+                }
+
+                // 버퍼에 값 저장 (초기 바이트를 0으로 채우고 뒤에서부터 값 삽입)
+                val paddedArray = ByteArray(byteLength) { 0 }
+                System.arraycopy(valueBytes, valueBytes.size - byteLength, paddedArray, 0, byteLength)
+
+                println("16진수로 변환된 Int 값: ${paddedArray.joinToString(" ") { String.format("%02X", it) }}") // 16진수 출력
+                buffer.put(paddedArray)
+            }
             BigDecimal::class -> {
                 val scaledValue = (value as BigDecimal).movePointRight(scale).toBigInteger() // scale 적용 후 정수 변환
                 val byteArray = scaledValue.toByteArray() // 정수를 바이트 배열로 변환
