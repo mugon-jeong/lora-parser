@@ -1,5 +1,9 @@
 # Lora Data Parser 프로젝트 설명
 
+## 실사용
+
+src/test/kotlin/io/parser/lora 참고
+
 ## 프로젝트 개요
 **Lora Data Parser**는 Lora 기반 센서 데이터를 효율적으로 처리하고 변환하는 확장 가능하고 유연한 데이터 파싱 시스템입니다.  
 **어노테이션**과 **리플렉션**을 활용하여 다양한 데이터 구조를 처리하며,  
