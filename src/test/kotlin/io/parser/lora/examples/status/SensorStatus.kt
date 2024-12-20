@@ -23,7 +23,7 @@ data class SensorStatus(
             return ByteParsable.parseBytes(bytes)
         }
         fun random(): SensorStatus {
-            return ByteParsable.generateRandomInstance()
+            return ByteParsable.generateRandomInstance<SensorStatus>()
         }
     }
 }

@@ -9,7 +9,9 @@ import io.parser.lora.annotation.ParseHex
 import io.parser.lora.annotation.ParseStatus
 import io.parser.lora.enums.HexConverterType
 import io.parser.lora.examples.status.SensorStatus
+import io.parser.lora.provider.RandomProvider
 import java.math.BigDecimal
+import kotlin.reflect.KClass
 
 @LoraParser(size = 25)
 data class Weather(
@@ -59,22 +61,20 @@ data class Weather(
     val fwVersion: String // 펌웨어 버전
 ) : LoraParsable {
     companion object {
+
         fun fromLora(devEUI: String, log: String): Weather {
             return LoraParsable.parse<Weather>(devEUI, log)
         }
 
         /**
-         * 리플렉션을 사용해 랜덤 값을 생성하는 함수
-         * @param devEUI 장치 고유 식별자
-         * @return 랜덤 Weather 객체
+         * 랜덤 Weather 객체 생성
          */
-        fun random(devEUI: String): Weather {
-            return LoraParsable.random(devEUI) { klass ->
-                when (klass) {
-                    SensorStatus::class -> SensorStatus.random() // SensorStatus에 대해 커스텀 랜덤 생성기 사용
-                    else -> null // 기본 생성 로직 사용
-                }
-            }
+        fun random(
+            devEUI: String,
+            providers: Map<String, RandomProvider<*>> = emptyMap(),
+            classBasedRandomProvider: (KClass<*>) -> Any? = { null }
+        ): Weather {
+            return LoraParsable.random(devEUI, providers, classBasedRandomProvider)
         }
     }
 

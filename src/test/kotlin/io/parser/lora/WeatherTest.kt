@@ -4,10 +4,14 @@ import io.parser.lora.examples.TestUtils
 import io.parser.lora.examples.sensor.Weather
 import io.parser.lora.examples.status.GasAlarmStatus
 import io.parser.lora.examples.status.SensorStatus
+import io.parser.lora.provider.ListBasedRandomProvider
+import io.parser.lora.provider.RandomProvider
+import io.parser.lora.provider.RangeBasedRandomProvider
 import io.parser.lora.registry.ParseStatusRegistry
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 
 class WeatherTest {
     @BeforeEach
@@ -22,7 +26,25 @@ class WeatherTest {
 
     @Test
     fun test() {
-        val test = Weather.random("1b86fdae3d011c21")
+        val test = Weather.random(
+            devEUI = "1b86fdae3d011c21",
+            providers = mapOf(
+                "temperature" to ListBasedRandomProvider(listOf(BigDecimal("20.0"), BigDecimal("30.5"), BigDecimal("15.2"))),
+                "humidity" to ListBasedRandomProvider(listOf(BigDecimal("60.0"), BigDecimal("80.0"), BigDecimal("50.0"))),
+                "payloadType" to RangeBasedRandomProvider(1..100)
+//                "status" to object : RandomProvider<SensorStatus> {
+//                    override fun getRandomValue(): SensorStatus {
+//                        return SensorStatus.random()
+//                    }
+//                }
+            ),
+//            classBasedRandomProvider = {
+//                when (it) {
+//                    SensorStatus::class -> SensorStatus.random()
+//                    else -> null
+//                }
+//            }
+        )
         println(test)
         val dummy = test.toDummy()
         val weather = Weather.fromLora(dummy.devEUI, dummy.lora)

@@ -2,6 +2,8 @@ package io.parser.lora
 
 import io.parser.lora.annotation.DevEUI
 import io.parser.lora.annotation.LoraParser
+import io.parser.lora.annotation.ParseStatus
+import io.parser.lora.provider.RandomProvider
 import io.parser.lora.registry.AnnotationHandlerRegistry
 import io.parser.lora.utils.HexUtils.base64ToByteArray
 import io.parser.lora.utils.hexToByteArray
@@ -18,6 +20,25 @@ interface LoraParsable {
     val devEUI: String
 
     companion object {
+        /**
+         * 클래스의 모든 필드 이름을 가져옵니다.
+         */
+        fun <T : LoraParsable> getAvailableKeys(clazz: KClass<T>): List<String> {
+            return clazz.memberProperties.map { it.name }
+        }
+        /**
+         * 제공된 키의 유효성을 검증합니다.
+         * @param clazz 검증할 데이터 클래스
+         * @param providedKeys 제공된 키 목록
+         * @throws IllegalArgumentException 유효하지 않은 키가 포함된 경우 예외를 발생
+         */
+        fun <T : LoraParsable> validateKeys(clazz: KClass<T>, providedKeys: Set<String>) {
+            val availableKeys = getAvailableKeys(clazz).toSet()
+            val invalidKeys = providedKeys - availableKeys
+            require(invalidKeys.isEmpty()) {
+                "Invalid keys: $invalidKeys. Available keys are: $availableKeys"
+            }
+        }
         /**
          * Base64로 인코딩된 `devEUI`와 센서 데이터 `log`를 기반으로 클래스 [T]를 파싱합니다.
          *
@@ -63,9 +84,16 @@ interface LoraParsable {
          * @param devEUI 장치 고유 식별자 (선택적)
          * @return 랜덤 [T] 객체
          */
-        inline fun <reified T : Any> random(devEUI: String, crossinline customRandomProvider: (KClass<*>) -> Any? = { null }): T {
+        inline fun <reified T : LoraParsable> random(
+            devEUI: String,
+            providers: Map<String, RandomProvider<*>> = emptyMap(),
+            crossinline classBasedRandomProvider: (KClass<*>) -> Any? = { null }
+        ): T {
             val clazz = T::class
-            require(clazz.isData) { "Only data classes are supported." }
+
+            // 키 검증
+            validateKeys(clazz, providers.keys)
+
             val constructor = clazz.primaryConstructor
                 ?: throw IllegalArgumentException("Class must have a primary constructor")
 
@@ -74,11 +102,36 @@ interface LoraParsable {
                     ?: throw IllegalArgumentException("Property ${param.name} not found in class ${clazz.simpleName}")
                 property.isAccessible = true
 
-                // 핸들러를 순회하며 처리
-                val handler = AnnotationHandlerRegistry.handlers.find { it.canHandle(property, param) }
-                    ?: throw IllegalArgumentException("Unsupported property '${property.name}' in class ${clazz.simpleName}")
-                handler.random(property, param, devEUI) {
-                    customRandomProvider(it)
+                // 필드 이름 기반 프로바이더 확인
+                val fieldRandomProvider = providers[param.name]?.getRandomValue()
+
+                // 어노테이션 기반 처리: ParseStatus 확인
+                val annotationBasedValue = property.annotations.firstNotNullOfOrNull { annotation ->
+                    when (annotation) {
+                        is ParseStatus -> {
+                            val paramType = param.type.classifier as? KClass<*>
+                                ?: throw IllegalArgumentException("Invalid type for ParseStatus on property '${property.name}'")
+                            if (ByteParsable::class.java.isAssignableFrom(paramType.java)) {
+                                ByteParsable.generateRandomInstance(paramType)
+                            } else {
+                                null
+                            }
+                        }
+                        else -> null
+                    }
+                }
+
+                // 필드 이름 기반 프로바이더가 없으면 클래스 기반 프로바이더 확인
+                // 필드 이름 기반 프로바이더 또는 어노테이션 기반 처리 값 확인
+                val value = fieldRandomProvider
+                    ?: annotationBasedValue
+                    ?: classBasedRandomProvider(param.type.classifier as KClass<*>)
+
+                // 값이 없으면 기본 핸들러 사용
+                value ?: run {
+                    val handler = AnnotationHandlerRegistry.handlers.find { it.canHandle(property, param) }
+                        ?: throw IllegalArgumentException("Unsupported property '${property.name}' in class ${clazz.simpleName}")
+                    handler.random(property, param, devEUI) { classBasedRandomProvider(it) }
                 }
             }
 

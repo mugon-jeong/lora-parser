@@ -2,6 +2,7 @@ package io.parser.lora
 
 import io.parser.lora.annotation.BitField
 import kotlin.random.Random
+import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
 
@@ -137,8 +138,12 @@ interface ByteParsable {
         }
 
         inline fun <reified T : Any> generateRandomInstance(): T {
-            val clazz = T::class
-            val constructor = clazz.constructors.first()
+            return generateRandomInstance(T::class)
+        }
+
+        fun <T : Any> generateRandomInstance(clazz: KClass<T>): T {
+            val constructor = clazz.constructors.firstOrNull()
+                ?: throw IllegalArgumentException("Class ${clazz.simpleName} must have a primary constructor")
 
             // 생성자 파라미터와 매칭하여 값 설정
             val args = constructor.parameters.associateWith { param ->
